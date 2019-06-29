@@ -66,7 +66,7 @@ typedef struct {
 
 	double			output_bitrate;		// Output bitrate (bps)
 	long			output_tmout;		// Smooth interval miliseconds
-	long			usleep_overhead;		// How much more usecs uslep(1) takes
+	long			usleep_overhead;		// How much more usecs nanosleep(1000) takes
 	long			output_packets_per_sec;	// How much packets should be sent in one second
 
 	time_t			epg_conf_mtime;		// Last change time of epg config

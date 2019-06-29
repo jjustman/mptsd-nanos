@@ -36,18 +36,25 @@ void * calibrate_sleep(void *_config) {
 		LOGf("\tRequest timeout   : %ld us\n", conf->output_tmout);
 	}
 
-	do {
-		gettimeofday(&tv1, NULL);
-		usleep(1);
-		gettimeofday(&tv2, NULL);
-		diff += timeval_diff_usec(&tv1, &tv2) - 1;
-	} while (loops++ != 3000);
+	struct timespec nsleep;
+        nsleep.tv_sec =	0;
+        nsleep.tv_nsec = (100);
 
-	conf->usleep_overhead = diff / loops;
+	gettimeofday(&tv1, NULL);
+	do {
+	  nanosleep(&nsleep,NULL);
+	} while (loops++ != 3000);
+	gettimeofday(&tv2, NULL);
+
+	printf("tv.2 nsec: %lu,\ntv1.nsec: %lu\n", tv2.tv_usec, tv1.tv_usec);;
+	
+	diff += timeval_diff_usec(&tv1, &tv2) - 1;
+	printf("diff is: %lu", diff);
+	conf->usleep_overhead = diff / (loops*10);
 	conf->output_tmout -= conf->usleep_overhead;
 
 	if (!conf->quiet) {
-		LOGf("\tusleep(1) overhead: %ld us\n", conf->usleep_overhead);
+		LOGf("\tnanosleep(1000) overhead: %ld us\n", conf->usleep_overhead);
 		LOGf("\tOutput pkt tmout  : %ld us\n", conf->output_tmout);
 	}
 

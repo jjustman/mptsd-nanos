@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <math.h>
 #include <inttypes.h>
+#include <assert.h>
 
 #include "libfuncs/io.h"
 #include "libfuncs/log.h"
@@ -108,9 +109,12 @@ ssize_t ts_frame_write(OUTPUT *o, uint8_t *data) {
 		o->traffic_period += written;
 	}
 
-	if (o->ofd)
-		write(o->ofd, data, FRAME_PACKET_SIZE);
-
+	if (o->ofd) {
+	  ssize_t fp_written;
+	  fp_written =  write(o->ofd, data, FRAME_PACKET_SIZE);
+	  assert(fp_written > 0);
+	  //written += fp_written;
+	}
 	return written;
 }
 
@@ -135,7 +139,10 @@ void * output_handle_write(void *_config) {
 			if (o->dienow)
 				goto OUT;
 			//LOGf("MIX: Waiting for obuf %d\n", buf_in_use);
-			usleep(1);
+			struct timespec msleep;
+			msleep.tv_sec = 0;
+			msleep.tv_nsec = 100;
+			nanosleep(&msleep, NULL);
 		}
 		curbuf->status = obuf_emptying; // Mark buffer as being filled
 
@@ -198,8 +205,14 @@ void * output_handle_write(void *_config) {
 				}
 
 			}
-			if (sleep_interval > 0)
-				usleep(sleep_interval);
+			if (sleep_interval > 0) {
+			  struct timespec sival;
+			  sival.tv_sec = 0;
+			  sival.tv_nsec = sleep_interval * 1000;
+			  
+			  nanosleep(&sival, NULL);
+			  
+			}
 			gettimeofday(&used_ts, NULL);
 			packets_written++;
 		}
@@ -207,7 +220,12 @@ void * output_handle_write(void *_config) {
 		unsigned long long write_time = timeval_diff_usec(&start_write_ts, &end_write_ts);
 		if (write_time < o->obuf_ms * 1000) {
 			//LOGf("Writen for -%llu us less\n", o->obuf_ms*1000 - write_time);
-			usleep(o->obuf_ms*1000 - write_time);
+		  struct timespec obsleep;
+		  
+                          obsleep.tv_sec = 0;
+                          obsleep.tv_nsec = o->obuf_ms*1000000 - write_time;
+		          nanosleep(&obsleep, NULL);
+			  
 		} else {
 			//LOGf("Writen for +%llu us more\n", write_time - o->obuf_ms*1000);
 		}
@@ -215,7 +233,8 @@ void * output_handle_write(void *_config) {
 		obuf_reset(curbuf); // Buffer us all used up
 		buf_in_use = buf_in_use ? 0 : 1; // Switch buffer
 		if (written < 0) {
-			LOG("OUTPUT: Error writing into output socket.\n");
+		  LOGf("OUTPUT: Error writing into output socket: %ld.\n", written);
+	
 			shutdown_fd(&o->out_sock);
 			connect_output(o);
 		}

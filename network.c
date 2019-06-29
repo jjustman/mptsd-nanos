@@ -287,7 +287,7 @@ resync:
 			proxy_log(r, "mpeg_sync fdread() timeoutA");
 			return 1; // reconnect
 		}
-		// LOGf("DEBUG:     Read 0x%02x Offset %u Sync: %u\n", (uint8_t)syncframe[0], read_bytes, sync_packets);
+		//		 LOGf("DEBUG:     Read 0x%02x Offset %u Sync: %u\n", (uint8_t)syncframe[0], read_bytes, sync_packets);
 		read_bytes++;
 		if (syncframe[0] == 0x47) {
 			ssize_t rdsz = fdread_ex(r->sock, syncframe, 188-1, _timeout, _retries, 1);

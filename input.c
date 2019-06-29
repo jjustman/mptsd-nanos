@@ -156,7 +156,11 @@ void input_buffer_add(INPUT *r, uint8_t *data, int datasize) {
 		}
 	}
 	if (cbuf_fill(r->buf, data, datasize) != 0) {
-		proxy_log(r, "Disable input, buffer is full.");
+	  proxy_log(r, "datasize is: ");
+	  printf("DATASIZ---E: %d", datasize);
+	  
+	  
+	  proxy_log(r, "Disable input, buffer is full.");
 		r->disabled = 1;
 	}
 }

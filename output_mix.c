@@ -56,7 +56,10 @@ void * output_handle_mix(void *_config) {
 	while (!o->dienow) {
 		OBUF *curbuf = &o->obuf[buf_in_use];
 
-		usleep(o->obuf_ms); // Fill interval
+		struct timespec nsleep;
+		nsleep.tv_sec = 0;
+		nsleep.tv_nsec = (o->obuf_ms * 1000);		
+		nanosleep(&nsleep, NULL); // Fill interval
 
 		output_show_programs(conf);
 
@@ -64,7 +67,10 @@ void * output_handle_mix(void *_config) {
 			if (o->dienow)
 				goto OUT;
 			//LOGf("MIX: Waiting for obuf %d\n", buf_in_use);
-			usleep(1);
+			struct timespec msleep;
+			msleep.tv_sec = 0;
+			msleep.tv_nsec = 1000;
+			nanosleep(&msleep, NULL);
 		}
 
 		list_lock(conf->inputs);

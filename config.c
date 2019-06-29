@@ -525,8 +525,8 @@ void config_load(CONFIG *conf, int argc, char **argv) {
 				break;
 			case 'B':
 				conf->output_bitrate = atof(optarg);
-				if (conf->output_bitrate < 2 || conf->output_bitrate > 75) {
-					fprintf(stderr, "Invalid output bitrate: %.2f (valid 2-75)\n", conf->output_bitrate);
+				if (conf->output_bitrate < 2 || conf->output_bitrate > 1000) {
+					fprintf(stderr, "Invalid output bitrate: %.2f (valid 2-1000)\n", conf->output_bitrate);
 					exit(1);
 				}
 				break;
